@@ -1,85 +1,71 @@
+#define max 10
 #include <stdio.h>
-#define MAX 10
 
-struct process
-{
-    int at;
-    int bt;
-    int wt;
-    int tat;
-    int ct;
+struct process {
+    int at, bt;
+    int ct, wt, tat;
 };
-
-void sortProcess(struct process p[], int n)
-{
-    for(int i=0;i<n-1;i++)
-    {
-        for(int j=0;j<n-1-i;j++)
-        {
-            if(p[j].at > p[j+1].at)
-            {
-                struct process temp=p[j];
-                p[j]=p[j+1];
-                p[j+1]=temp;
-            }
-        }
-    }
-}
 
 void FCFS(struct process p[], int n)
 {
-    int t=0;
+    int t = 0;
+    float total_wt = 0, total_tat = 0;
 
-    sortProcess(p,n);
+    for(int i = 0; i < n - 1; i++)
+    {
+        for(int j = i + 1; j < n; j++)
+        {
+            if(p[i].at > p[j].at)
+            {
+                struct process temp = p[i];
+                p[i] = p[j];
+                p[j] = temp;
+            }
+        }
+    }
 
-    for(int i=0;i<n;i++)
+    for(int i = 0; i < n; i++)
     {
         if(t < p[i].at)
             t = p[i].at;
 
-        p[i].wt = t - p[i].at;
         p[i].ct = t + p[i].bt;
         p[i].tat = p[i].ct - p[i].at;
+        p[i].wt = p[i].tat - p[i].bt;
 
-        t = t + p[i].bt;
+        total_wt += p[i].wt;
+        total_tat += p[i].tat;
+
+        t = p[i].ct;
     }
 
-    printf("\n%-5s%-5s%-5s%-5s%-5s%-5s\n","PID","AT","BT","CT","WT","TAT");
+    printf("\nAT\tBT\tCT\tWT\tTAT\n");
 
-    for(int i=0;i<n;i++)
+    for(int i = 0; i < n; i++)
     {
-        printf("%-5d%-5d%-5d%-5d%-5d%-5d\n",i,p[i].at,p[i].bt,p[i].ct,p[i].wt,p[i].tat);
+        printf("%d\t%d\t%d\t%d\t%d\n",
+               p[i].at, p[i].bt,
+               p[i].ct, p[i].wt, p[i].tat);
     }
 
-    float awt=0, atat=0;
-
-    for(int i=0;i<n;i++)
-    {
-        awt += p[i].wt;
-        atat += p[i].tat;
-    }
-
-    awt = awt/n;
-    atat = atat/n;
-
-    printf("\nAverage Waiting Time = %.2f",awt);
-    printf("\nAverage Turnaround Time = %.2f\n",atat);
+    printf("\nAverage WT = %.2f", total_wt/n);
+    printf("\nAverage TAT = %.2f\n", total_tat/n);
 }
 
 int main()
 {
     int n;
-    struct process p[MAX];
+    struct process p[max];
 
     printf("Enter number of processes: ");
     scanf("%d",&n);
 
     for(int i=0;i<n;i++)
     {
-        printf("Enter arrival time for process %d: ",i);
+        printf("AT of P%d: ",i);
         scanf("%d",&p[i].at);
 
-        printf("Enter burst time for process %d: ",i);
+        printf("BT of P%d: ",i);
         scanf("%d",&p[i].bt);
     }
 
