@@ -1,53 +1,77 @@
 #include <stdio.h>
-#define MAX 100
-struct process {
-    int at;   
-    int bt;  
-    int rt;   
-    int wt;   
-    int tat;  
-    int ct; 
+struct process
+{
+    int at, bt, ct, rt, wt, tat;
 };
-void RoundRobin(struct process p[], int n, int tq) {
-    int t = 0, completed = 0;
-    int queue[MAX], front = 0, rear = 0;
-    int visited[MAX] = {0};
-    for (int i = 0; i < n; i++) {
+
+void roundRobin(struct process p[], int n, int tq)
+{
+    int completed = 0, t = 0;
+
+    int queue[100];
+    int front = 0, rear = 0;
+
+    int visited[100] = {0};
+
+    int gantt[1000];
+    int k = 0;
+
+    for (int i = 0; i < n; i++)
         p[i].rt = p[i].bt;
-    }
+
     queue[rear++] = 0;
     visited[0] = 1;
-    while (completed < n) {
+
+    while (completed < n)
+    {
         int idx = queue[front++];
-        if (p[idx].rt > 0) {
-            if (p[idx].rt > tq) {
+
+        if (p[idx].rt > 0)
+        {
+            gantt[k++] = idx;
+
+            if (p[idx].rt > tq)
+            {
                 t += tq;
                 p[idx].rt -= tq;
-            } else {
+            }
+            else
+            {
                 t += p[idx].rt;
+
                 p[idx].ct = t;
                 p[idx].tat = p[idx].ct - p[idx].at;
                 p[idx].wt = p[idx].tat - p[idx].bt;
+
                 p[idx].rt = 0;
                 completed++;
-            }         
-            for (int i = 0; i < n; i++) {
-                if (i != idx && !visited[i] && p[i].at <= t) {
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                if (i != idx && !visited[i] && p[i].at <= t)
+                {
                     queue[rear++] = i;
                     visited[i] = 1;
                 }
             }
 
-            if (p[idx].rt > 0) {
+            if (p[idx].rt > 0)
                 queue[rear++] = idx;
-            }
         }
-        if (front == rear && completed < n) {
-            for (int i = 0; i < n; i++) {
-                if (!visited[i]) {
+
+        if (front == rear && completed < n)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                if (!visited[i])
+                {
                     queue[rear++] = i;
                     visited[i] = 1;
-                    t = (p[i].at > t) ? p[i].at : t; 
+
+                    if (p[i].at > t)
+                        t = p[i].at;
+
                     break;
                 }
             }
@@ -55,36 +79,52 @@ void RoundRobin(struct process p[], int n, int tq) {
     }
 
     printf("\nID\tAT\tBT\tCT\tWT\tTAT\n");
+
     float total_wt = 0, total_tat = 0;
-    for (int i = 0; i < n; i++) {
+
+    for (int i = 0; i < n; i++)
+    {
         printf("%d\t%d\t%d\t%d\t%d\t%d\n",
-               i, p[i].at, p[i].bt, p[i].ct, p[i].wt, p[i].tat);
+               i,
+               p[i].at,
+               p[i].bt,
+               p[i].ct,
+               p[i].wt,
+               p[i].tat);
+
         total_wt += p[i].wt;
         total_tat += p[i].tat;
     }
 
-    printf("\nAverage Waiting Time: %.2f\n", total_wt / n);
-    printf("Average Turnaround Time: %.2f\n", total_tat / n);
+    printf("\nAverage Waiting Time = %.2f\n", total_wt / n);
+    printf("Average Turnaround Time = %.2f\n", total_tat / n);
+
+    printf("\nGantt Chart:\n");
+
+    for (int i = 0; i < k; i++)
+        printf("|P%d", gantt[i]);
+
+    printf("|\n");
 }
 
-int main() {
+int main()
+{
     int n, tq;
-    struct process p[MAX];
+    struct process p[100];
 
     printf("Enter number of processes: ");
     scanf("%d", &n);
 
-    for (int i = 0; i < n; i++) {
-        printf("Enter arrival time for process %d: ", i);
-        scanf("%d", &p[i].at);
-
-        printf("Enter burst time for process %d: ", i);
-        scanf("%d", &p[i].bt);
+    for (int i = 0; i < n; i++)
+    {
+        printf("Enter AT and BT for P%d: ", i);
+        scanf("%d%d", &p[i].at, &p[i].bt);
     }
 
-    printf("Enter time quantum: ");
+    printf("Enter Time Quantum: ");
     scanf("%d", &tq);
 
-    RoundRobin(p, n, tq);
+    roundRobin(p, n, tq);
+
     return 0;
 }
