@@ -1,62 +1,55 @@
-#define max 10
 #include <stdio.h>
 
-struct process {
-    int at;
-    int bt;
-    int rt;
-    int pr;
-    int wt;
-    int tat;
-    int ct;
-    int done;
+struct process
+{
+    int at, bt, ct, wt, tat, rt, pr, done;
 };
 
-void Priority_Preemptive(struct process p[], int n)
+void preemp_priority(struct process p[], int n)
 {
-    int completed = 0;
-    int t = 0;
-    float total_wt = 0, total_tat = 0;
+    int completed = 0, t = 0;
+    float awt = 0, atat = 0;
 
-    while(completed < n)
+    int gantt[1000];
+    int k = 0;
+
+    while (completed < n)
     {
         int idx = -1;
         int highest_pr = 9999;
 
-        // Find highest priority process among arrived processes
-        for(int i = 0; i < n; i++)
+        for (int i = 0; i < n; i++)
         {
-            if(p[i].at <= t && p[i].done == 0)
+            if (p[i].at <= t && p[i].done == 0)
             {
-                if(p[i].pr < highest_pr)
+                if (p[i].pr < highest_pr)
                 {
                     highest_pr = p[i].pr;
                     idx = i;
                 }
-                else if(p[i].pr == highest_pr)
+                else if (p[i].pr == highest_pr)
                 {
-                    // Tie-breaker: smaller remaining time
-                    if(p[i].rt < p[idx].rt)
-                    {
+                    if (p[i].rt < p[idx].rt)
                         idx = i;
-                    }
                 }
             }
         }
 
-        if(idx != -1)
+        if (idx != -1)
         {
+            gantt[k++] = idx;
+
             p[idx].rt--;
             t++;
 
-            if(p[idx].rt == 0)
+            if (p[idx].rt == 0)
             {
                 p[idx].ct = t;
                 p[idx].tat = p[idx].ct - p[idx].at;
                 p[idx].wt = p[idx].tat - p[idx].bt;
 
-                total_wt += p[idx].wt;
-                total_tat += p[idx].tat;
+                awt += p[idx].wt;
+                atat += p[idx].tat;
 
                 p[idx].done = 1;
                 completed++;
@@ -64,13 +57,13 @@ void Priority_Preemptive(struct process p[], int n)
         }
         else
         {
-            t++; // CPU Idle
+            t++;
         }
     }
 
     printf("\nID\tAT\tBT\tPR\tCT\tWT\tTAT\n");
 
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
         printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
                i,
@@ -82,34 +75,40 @@ void Priority_Preemptive(struct process p[], int n)
                p[i].tat);
     }
 
-    printf("\nAverage Waiting Time: %.2f\n", total_wt/n);
-    printf("Average Turnaround Time: %.2f\n", total_tat/n);
+    printf("\nAverage Waiting Time = %.2f\n", awt / n);
+    printf("Average Turnaround Time = %.2f\n", atat / n);
+
+    printf("\nGantt Chart:\n");
+
+    for (int i = 0; i < k; i++)
+        printf("|P%d", gantt[i]);
+
+    printf("|\n0");
+
+    for (int i = 1; i <= k; i++)
+        printf(" %d", i);
+
+    printf("\n");
 }
 
 int main()
 {
     int n;
-    struct process p[max];
+    struct process p[100];
 
     printf("Enter number of processes: ");
-    scanf("%d",&n);
+    scanf("%d", &n);
 
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
-        printf("Enter Arrival Time for P%d: ",i);
-        scanf("%d",&p[i].at);
-
-        printf("Enter Burst Time for P%d: ",i);
-        scanf("%d",&p[i].bt);
-
-        printf("Enter Priority for P%d: ",i);
-        scanf("%d",&p[i].pr);
+        printf("Enter AT, BT and Priority for P%d: ", i);
+        scanf("%d%d%d", &p[i].at, &p[i].bt, &p[i].pr);
 
         p[i].rt = p[i].bt;
         p[i].done = 0;
     }
 
-    Priority_Preemptive(p,n);
+    preemp_priority(p, n);
 
     return 0;
 }
