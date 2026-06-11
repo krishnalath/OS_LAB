@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 struct process
 {
     int at, bt, ct, rt, wt, tat;
@@ -14,7 +15,10 @@ void roundRobin(struct process p[], int n, int tq)
     int visited[100] = {0};
 
     int gantt[1000];
+    int times[1001];
     int k = 0;
+
+    times[0] = 0;
 
     for (int i = 0; i < n; i++)
         p[i].rt = p[i].bt;
@@ -28,7 +32,7 @@ void roundRobin(struct process p[], int n, int tq)
 
         if (p[idx].rt > 0)
         {
-            gantt[k++] = idx;
+            gantt[k] = idx;
 
             if (p[idx].rt > tq)
             {
@@ -46,6 +50,9 @@ void roundRobin(struct process p[], int n, int tq)
                 p[idx].rt = 0;
                 completed++;
             }
+
+            times[k + 1] = t;
+            k++;
 
             for (int i = 0; i < n; i++)
             {
@@ -105,6 +112,11 @@ void roundRobin(struct process p[], int n, int tq)
         printf("|P%d", gantt[i]);
 
     printf("|\n");
+
+    for (int i = 0; i <= k; i++)
+        printf("%d ", times[i]);
+
+    printf("\n");
 }
 
 int main()
